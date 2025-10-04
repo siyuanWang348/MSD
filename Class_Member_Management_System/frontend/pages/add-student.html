@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加学生 - 班级成员管理系统</title>
+    <script>
+        // 动态加载Tailwind CSS
+        (function() {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.tailwindcss.com';
+            script.onload = function() {
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            colors: {
+                                primary: '#165DFF',
+                                secondary: '#36CFC9',
+                                accent: '#722ED1',
+                                neutral: '#86909C',
+                            },
+                        }
+                    }
+                }
+            };
+            script.onerror = function() {
+                console.warn('Tailwind CSS CDN 加载失败');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+    <script>
+        // 提前定义Font Awesome加载逻辑
+        function loadFontAwesome() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = 'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css';
+            
+            link.onerror = function() {
+                console.warn('Font Awesome CDN 加载失败');
+            };
+            
+            document.head.appendChild(link);
+        }
+        
+        // 尽早加载Font Awesome
+        if (document.head) {
+            loadFontAwesome();
+        } else {
+            document.addEventListener('DOMContentLoaded', loadFontAwesome);
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="bg-white shadow-md fixed w-full z-10 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-graduation-cap text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-primary">班级成员管理系统</h1>
+            </div>
+            <div id="nav-links" class="hidden md:flex items-center space-x-6">
+                <a href="dashboard.html" class="text-neutral hover:text-primary transition-all">首页</a>
+                <a href="students.html" class="text-neutral hover:text-primary transition-all">学生列表</a>
+                <a href="add-student.html" class="text-primary font-medium">添加学生</a>
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-all">
+                    <i class="fa fa-sign-out mr-1"></i> 退出登录
+                </button>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden text-neutral hover:text-primary">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="dashboard.html" class="text-neutral hover:text-primary py-2 transition-all">首页</a>
+                <a href="students.html" class="text-neutral hover:text-primary py-2 transition-all">学生列表</a>
+                <a href="add-student.html" class="text-primary font-medium py-2">添加学生</a>
+                <button id="mobile-logout-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-all w-full">
+                    <i class="fa fa-sign-out mr-1"></i> 退出登录
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="pt-20 pb-10">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">添加学生</h2>
+                    <p class="text-gray-600">填写以下表单以添加新学生信息</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <form id="student-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="student-id" class="block text-sm font-medium text-gray-700 mb-1">学号 <span class="text-red-500">*</span></label>
+                                <input type="text" id="student-id" name="student-id" required
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-all">
+                                <div id="student-id-error" class="hidden text-red-500 text-sm mt-1"></div>
+                            </div>
+                            
+                            <div>
+                                <label for="student-name" class="block text-sm font-medium text-gray-700 mb-1">姓名 <span class="text-red-500">*</span></label>
+                                <input type="text" id="student-name" name="student-name" required
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-all">
+                                <div id="student-name-error" class="hidden text-red-500 text-sm mt-1"></div>
+                            </div>
+                            
+                            <div>
+                                <label for="student-class" class="block text-sm font-medium text-gray-700 mb-1">班级 <span class="text-red-500">*</span></label>
+                                <input type="text" id="student-class" name="student-class" required
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-all">
+                                <div id="student-class-error" class="hidden text-red-500 text-sm mt-1"></div>
+                            </div>
+                            
+                            <div>
+                                <label for="student-gender" class="block text-sm font-medium text-gray-700 mb-1">性别 <span class="text-red-500">*</span></label>
+                                <select id="student-gender" name="student-gender" required
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-all">
+                                    <option value="">请选择性别</option>
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                                <div id="student-gender-error" class="hidden text-red-500 text-sm mt-1"></div>
+                            </div>
+                            
+                            <div>
+                                <label for="student-phone" class="block text-sm font-medium text-gray-700 mb-1">联系电话 <span class="text-red-500">*</span></label>
+                                <input type="tel" id="student-phone" name="student-phone" required
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-all">
+                                <div id="student-phone-error" class="hidden text-red-500 text-sm mt-1"></div>
+                            </div>
+                            
+                            <div>
+                                <label for="student-email" class="block text-sm font-medium text-gray-700 mb-1">电子邮箱</label>
+                                <input type="email" id="student-email" name="student-email"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-all">
+                                <div id="student-email-error" class="hidden text-red-500 text-sm mt-1"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="student-address" class="block text-sm font-medium text-gray-700 mb-1">家庭住址</label>
+                            <textarea id="student-address" name="student-address" rows="3"
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-all"></textarea>
+                            <div id="student-address-error" class="hidden text-red-500 text-sm mt-1"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-end space-x-4 pt-4">
+                            <button type="button" id="cancel-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all">
+                                取消
+                            </button>
+                            <button type="submit" id="submit-btn" class="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-md text-sm font-medium transition-all flex items-center">
+                                <i class="fa fa-plus mr-2"></i> 添加学生
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 通知提示框 -->
+    <div id="notification" class="fixed bottom-6 right-6 p-4 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 flex items-center max-w-sm hidden">
+        <div id="notification-icon" class="mr-3 text-xl"></div>
+        <div>
+            <h3 id="notification-title" class="font-medium"></h3>
+            <p id="notification-message" class="text-sm text-gray-600"></p>
+        </div>
+        <button id="close-notification" class="ml-auto text-gray-400 hover:text-gray-600">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/students.js"></script>
+</body>
+</html>
